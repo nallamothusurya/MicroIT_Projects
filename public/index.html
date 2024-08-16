@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camelchat</title>
+    <style>
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    background-color: #005da4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+#login, #chatInterface {
+    display: none;
+    padding: 20px;
+    max-width: 600px;
+    margin: auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#login {
+    display: block;
+}
+
+textarea {
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    font-family: 'Roboto', Arial, sans-serif;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    background-color: #1e88e5;
+    color: #fff;
+    cursor: pointer;
+    margin-right: 10px;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 2px 2px rgba(0, 219, 55, 0.121);
+    font-family: 'Roboto', Arial, sans-serif;
+}
+
+button:hover {
+    background-color: #1565c0;
+}
+
+#messages {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+.message {
+    background: #e0e0e0;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
+
+#loading {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    text-align: center;
+    padding-top: 20%;
+    font-size: 24px;
+    font-family: 'Roboto', Arial, sans-serif;
+}
+
+.spinner {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #1e88e5;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+    </style>
+</head>
+<body>
+    <div id="loading">
+        <div class="spinner"></div>
+        <p>Loading, please wait...</p>
+    </div>
+
+    <div id="login">
+        <h1>Camel Chat</h1>
+        <h2>Enter your own or new password</h2>
+        <form id="loginForm">
+            <input type="password" id="password" name="password" placeholder="Enter password" required />
+            <button type="submit">Submit 🔐</button>
+        </form>
+    </div>
+    
+    <div id="chatInterface">
+        <h2>Camelchat</h2>
+        <div id="messages"></div>
+        <textarea id="messageInput" placeholder="just wait for getting new messages/Type your message here..."></textarea>
+        <button id="sendMessage">Send</button>
+        <button id="refreshMessages">Refresh for getting new messages</button> <!-- Refresh Button -->
+        <p>Note : After 24 hours chat automatically deleted</p>
+        <a href="https://vs24-five.vercel.app/" target="_blank"><p>camelpad : for storing and sending files </p></a>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const chatInterface = document.getElementById('chatInterface');
+        const messagesDiv = document.getElementById('messages');
+        const sendMessageButton = document.getElementById('sendMessage');
+        const refreshMessagesButton = document.getElementById('refreshMessages'); // Refresh Button
+        const messageInput = document.getElementById('messageInput');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+            showLoading();
+
+            try {
+                const response = await fetch('/files', {
+                    headers: {
+                        'Authorization': `Basic ${btoa(password)}`
+                    }
+                });
+
+                if (response.ok) {
+                    document.getElementById('login').style.display = 'none';
+                    chatInterface.style.display = 'block';
+                    loadMessages();
+                } else {
+                    showError('Password is too short bro 🌀');
+                }
+            } catch (error) {
+                showError('An error occurred 🌀');
+            } finally {
+                hideLoading();
+            }
+        });
+
+        sendMessageButton.addEventListener('click', async () => {
+            const message = messageInput.value.trim();
+            if (message === '') return;
+
+            showLoading();
+            try {
+                const password = document.getElementById('password').value;
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Basic ${btoa(password)}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message })
+                });
+                if (response.ok) {
+                    messageInput.value = '';
+                    loadMessages(); // Load messages after sending
+                } else {
+                    showError('Failed to send message 🌀');
+                }
+            } catch (error) {
+                showError('Are you confirm to refresh 🌀');
+            } finally {
+                hideLoading();
+            }
+        });
+
+        refreshMessagesButton.addEventListener('click', () => {
+            loadMessages(); // Load messages on refresh
+        });
+
+        const loadMessages = async () => {
+            const password = document.getElementById('password').value;
+            try {
+                const response = await fetch('/messages', {
+                    headers: {
+                        'Authorization': `Basic ${btoa(password)}`
+                    }
+                });
+
+                if (response.ok) {
+                    const messages = await response.json();
+                    messagesDiv.innerHTML = '';
+                    messages.forEach(msg => {
+                        const msgDiv = document.createElement('div');
+                        msgDiv.className = 'message';
+                        msgDiv.textContent = msg.content;
+                        messagesDiv.appendChild(msgDiv);
+                    });
+                } else {
+                    showError('Failed to load messages 🌀');
+                }
+            } catch (error) {
+                showError('Are you confirm to refresh 🌀');
+            }
+        };
+
+        const showLoading = () => {
+            document.getElementById('loading').style.display = 'block';
+        };
+
+        const hideLoading = () => {
+            document.getElementById('loading').style.display = 'none';
+        };
+
+        const showError = (message) => {
+            alert(message); // Simple alert for errors
+        };
+    </script>
+</body>
+</html>
