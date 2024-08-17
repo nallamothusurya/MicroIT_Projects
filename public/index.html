@@ -5,103 +5,102 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Camelchat</title>
     <style>
-/* Import Google Font */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+        /* Import Google Font */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
-body {
-    font-family: 'Roboto', Arial, sans-serif;
-    background-color: #005da4;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-}
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: #005da4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
 
-#login, #chatInterface {
-    display: none;
-    padding: 20px;
-    max-width: 600px;
-    margin: auto;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+        #login, #chatInterface {
+            display: none;
+            padding: 20px;
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
 
-#login {
-    display: block;
-}
+        #login {
+            display: block;
+        }
 
-textarea {
-    width: 100%;
-    height: 100px;
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-    font-family: 'Roboto', Arial, sans-serif;
-}
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
 
-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    background-color: #1e88e5;
-    color: #fff;
-    cursor: pointer;
-    margin-right: 10px;
-    transition: background-color 0.3s ease;
-    box-shadow: 0 2px 2px rgba(0, 219, 55, 0.121);
-    font-family: 'Roboto', Arial, sans-serif;
-}
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background-color: #1e88e5;
+            color: #fff;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 2px rgba(0, 219, 55, 0.121);
+            font-family: 'Roboto', Arial, sans-serif;
+        }
 
-button:hover {
-    background-color: #1565c0;
-}
+        button:hover {
+            background-color: #1565c0;
+        }
 
-#messages {
-    max-height: 300px;
-    overflow-y: auto;
-    margin-bottom: 10px;
-}
+        #messages {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
 
-.message {
-    background: #e0e0e0;
-    padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 5px;
-}
+        .message {
+            background: #e0e0e0;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
 
-#loading {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    color: #fff;
-    text-align: center;
-    padding-top: 20%;
-    font-size: 24px;
-    font-family: 'Roboto', Arial, sans-serif;
-}
+        #loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            text-align: center;
+            padding-top: 20%;
+            font-size: 24px;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
 
-.spinner {
-    border: 8px solid #f3f3f3;
-    border-top: 8px solid #1e88e5;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 1s linear infinite;
-    margin: 0 auto;
-}
+        .spinner {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #1e88e5;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -122,11 +121,11 @@ button:hover {
     <div id="chatInterface">
         <h2>Camelchat</h2>
         <div id="messages"></div>
-        <textarea id="messageInput" placeholder="just wait for getting new messages/Type your message here..."></textarea>
+        <textarea id="messageInput" placeholder="Type your message here..."></textarea>
         <button id="sendMessage">Send</button>
-        <button id="refreshMessages">Refresh for getting new messages</button> <!-- Refresh Button -->
-        <p>Note : After 24 hours chat automatically deleted</p>
-        <a href="https://vs24-five.vercel.app/" target="_blank"><p>camelpad : for storing and sending files </p></a>
+        <button id="refreshMessages">Refresh Messages</button>
+        <p>Note: After 24 hours chat automatically deleted</p>
+        <a href="https://vs24-five.vercel.app/" target="_blank"><p>Camelpad: for storing and sending files</p></a>
     </div>
 
     <script>
@@ -134,7 +133,7 @@ button:hover {
         const chatInterface = document.getElementById('chatInterface');
         const messagesDiv = document.getElementById('messages');
         const sendMessageButton = document.getElementById('sendMessage');
-        const refreshMessagesButton = document.getElementById('refreshMessages'); // Refresh Button
+        const refreshMessagesButton = document.getElementById('refreshMessages');
         const messageInput = document.getElementById('messageInput');
 
         loginForm.addEventListener('submit', async (e) => {
@@ -153,11 +152,12 @@ button:hover {
                     document.getElementById('login').style.display = 'none';
                     chatInterface.style.display = 'block';
                     loadMessages();
+                    startAutoRefresh(); // Start auto-refreshing messages
                 } else {
-                    showError('Password is too short bro 🌀');
+                    showError('Incorrect password. Please try again.');
                 }
             } catch (error) {
-                showError('An error occurred 🌀');
+                showError('An error occurred. Please try again.');
             } finally {
                 hideLoading();
             }
@@ -182,10 +182,10 @@ button:hover {
                     messageInput.value = '';
                     loadMessages(); // Load messages after sending
                 } else {
-                    showError('Failed to send message 🌀');
+                    showError('Failed to send message.');
                 }
             } catch (error) {
-                showError('Are you confirm to refresh 🌀');
+                showError('An error occurred. Please try again.');
             } finally {
                 hideLoading();
             }
@@ -196,31 +196,32 @@ button:hover {
         });
 
         const loadMessages = async () => {
-            const password = document.getElementById('password').value;
-            try {
-                const response = await fetch('/messages', {
-                    headers: {
-                        'Authorization': `Basic ${btoa(password)}`
-                    }
-                });
-
-                if (response.ok) {
-                    const messages = await response.json();
-                    messagesDiv.innerHTML = '';
-                    messages.forEach(msg => {
-                        const msgDiv = document.createElement('div');
-                        msgDiv.className = 'message';
-                        msgDiv.textContent = msg.content;
-                        messagesDiv.appendChild(msgDiv);
-                    });
-                } else {
-                    showError('Failed to load messages 🌀');
-                }
-            } catch (error) {
-                showError('Are you confirm to refresh 🌀');
+    const password = document.getElementById('password').value;
+    try {
+        const response = await fetch('/messages', {
+            headers: {
+                'Authorization': `Basic ${btoa(password)}`
             }
-        };
+        });
 
+        if (response.ok) {
+            const messages = await response.json();
+            messagesDiv.innerHTML = '';
+            messages.forEach(msg => {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = 'message';
+                msgDiv.textContent = msg.content;
+                messagesDiv.appendChild(msgDiv);
+            });
+        } else {
+            const errorMessage = `Failed to load messages. Status: ${response.status}, Status Text: ${response.statusText}`;
+            showError(errorMessage);
+        }
+    } catch (error) {
+        const errorMessage = `An error occurred while loading messages: ${error.message}`;
+        showError(errorMessage);
+    }
+};
         const showLoading = () => {
             document.getElementById('loading').style.display = 'block';
         };
@@ -231,6 +232,12 @@ button:hover {
 
         const showError = (message) => {
             alert(message); // Simple alert for errors
+        };
+
+        const startAutoRefresh = () => {
+            setInterval(() => {
+                refreshMessagesButton.click();
+            }, 3000); // Refresh every 3 seconds
         };
     </script>
 </body>
