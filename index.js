@@ -2,14 +2,10 @@ const express = require('express');
 const multer = require('multer');
 const stream = require('stream');
 const { google } = require('googleapis');
-const http = require('http');
-const socketIo = require('socket.io');
 require('dotenv').config();
 
 const app = express();
 app.use(express.static(__dirname));
-const server = http.createServer(app); // Create an HTTP server
-const io = socketIo(server); // Integrate socket.io with the server
 const PARENT_FOLDER_ID = '1Jef60EVgxjaN2jmxknCwrD72eT78arnu'; // Replace with your Google Drive parent folder ID
 const SCOPES = ['https://www.googleapis.com/auth/drive'];
 const credentials = {
@@ -163,8 +159,9 @@ app.post('/upload', extractPassword, upload.single('file'), async (req, res) => 
 });
 
 // Handle chat messages
+// Handle chat messages
 app.post('/chat', extractPassword, async (req, res) => {
-    const { message } = req.body;
+    const { username, message } = req.body;
 
     if (!message || message.trim() === '') {
         return res.status(400).json({ error: 'Message content is required' });
@@ -172,17 +169,20 @@ app.post('/chat', extractPassword, async (req, res) => {
 
     try {
         const folderId = await findOrCreateUserFolder(req.password);
-        // Here you can handle saving the chat message to a file or database
-        // For demonstration, we assume that we save it in a file
+        const fileName = `message-${Date.now()}.txt`;
         const fileMetadata = {
-            name: `message-${Date.now()}.txt`,
+            name: fileName,
             mimeType: 'text/plain',
             parents: [folderId],
         };
 
+        const messageContent = `${username || 'Anonymous'}: ${message}`;
+        const bufferStream = new stream.PassThrough();
+        bufferStream.end(messageContent);
+
         const media = {
             mimeType: 'text/plain',
-            body: new stream.PassThrough().end(message),
+            body: bufferStream,
         };
 
         await drive.files.create({
@@ -190,7 +190,7 @@ app.post('/chat', extractPassword, async (req, res) => {
             media: media,
             fields: 'id, name',
         });
-        io.to(req.password).emit('chatMessage', { message });
+
         res.status(200).json({ message: 'Message saved successfully' });
     } catch (error) {
         res.status(500).send(error.message);
@@ -226,20 +226,6 @@ app.get('/messages', extractPassword, async (req, res) => {
     } catch (error) {
         res.status(500).send(error.message);
     }
-});
-
-io.on('connection', (socket) => {
-    console.log('A user connected');
-    
-    // Join a room based on the password
-    socket.on('join', (password) => {
-        socket.join(password);
-        console.log(`User joined room: ${password}`);
-    });
-
-    socket.on('disconnect', () => {
-        console.log('User disconnected');
-    });
 });
 
 app.listen(5050, () => {

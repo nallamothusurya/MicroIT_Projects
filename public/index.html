@@ -10,49 +10,61 @@
 
         body {
             font-family: 'Roboto', Arial, sans-serif;
-            background-color: #005da4;
+            background-color: #004080;
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
+            align-items: center;
+            justify-content: center;
             height: 100vh;
+            color: #fff;
         }
 
         #login, #chatInterface {
             display: none;
+            width: 100%;
+            max-width: 400px;
             padding: 20px;
-            max-width: 600px;
-            margin: auto;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgb(255, 255, 255);
+            color: #000000;
+            font-size: 16px;
         }
 
         #login {
             display: block;
         }
 
-        textarea {
-            width: 100%;
-            height: 100px;
+        h1, h2 {
+            margin: 0 0 15px;
+            text-align: center;
+            color: #004080;
+        }
+
+        input[type="password"], input[type="text"], textarea {
+            width: calc(100% - 20px);
             padding: 10px;
             margin: 10px 0;
-            border-radius: 4px;
+            border-radius: 5px;
             border: 1px solid #ddd;
             font-family: 'Roboto', Arial, sans-serif;
+            font-size: 16px;
         }
 
         button {
-            padding: 10px 20px;
+            width: calc(100% - 20px);
+            padding: 10px;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
             background-color: #1e88e5;
             color: #fff;
             cursor: pointer;
-            margin-right: 10px;
+            margin: 10px 0;
             transition: background-color 0.3s ease;
-            box-shadow: 0 2px 2px rgba(0, 219, 55, 0.121);
             font-family: 'Roboto', Arial, sans-serif;
+            font-size: 16px;
         }
 
         button:hover {
@@ -63,13 +75,24 @@
             max-height: 300px;
             overflow-y: auto;
             margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #f0f0f0;
         }
 
         .message {
             background: #e0e0e0;
             padding: 10px;
-            border-radius: 4px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .message strong {
+            display: block;
             margin-bottom: 5px;
+            font-weight: 500;
+            color: #000000;
+            font-weight: bold;
         }
 
         #loading {
@@ -79,11 +102,12 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.7);
             color: #fff;
             text-align: center;
             padding-top: 20%;
             font-size: 24px;
+            z-index: 1000;
             font-family: 'Roboto', Arial, sans-serif;
         }
 
@@ -94,7 +118,7 @@
             width: 50px;
             height: 50px;
             animation: spin 1s linear infinite;
-            margin: 0 auto;
+            margin: 0 auto 20px;
         }
 
         @keyframes spin {
@@ -111,10 +135,11 @@
 
     <div id="login">
         <h1>Camel Chat</h1>
-        <h2>Enter your own or new password</h2>
+        <h2>Enter your username and password</h2>
         <form id="loginForm">
+            <input type="text" id="username" name="username" placeholder="Enter username" required />
             <input type="password" id="password" name="password" placeholder="Enter password" required />
-            <button type="submit">Submit 🔐</button>
+            <button type="submit">Login 🔐</button>
         </form>
     </div>
     
@@ -124,8 +149,10 @@
         <textarea id="messageInput" placeholder="Type your message here..."></textarea>
         <button id="sendMessage">Send</button>
         <button id="refreshMessages">Refresh Messages</button>
-        <p>Note: After 24 hours chat automatically deleted</p>
-        <a href="https://vs24-five.vercel.app/" target="_blank"><p>Camelpad: for storing and sending files</p></a>
+        <p>Note: After 24 hours, chats are automatically deleted.</p>
+        <a href="https://vs24-five.vercel.app/" target="_blank">
+            <p>Camelpad: for storing and sending files</p>
+        </a>
     </div>
 
     <script>
@@ -135,19 +162,21 @@
         const sendMessageButton = document.getElementById('sendMessage');
         const refreshMessagesButton = document.getElementById('refreshMessages');
         const messageInput = document.getElementById('messageInput');
-
+        let username = '';
+    
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             showLoading();
-
+    
             try {
                 const response = await fetch('/files', {
                     headers: {
                         'Authorization': `Basic ${btoa(password)}`
                     }
                 });
-
+    
                 if (response.ok) {
                     document.getElementById('login').style.display = 'none';
                     chatInterface.style.display = 'block';
@@ -162,11 +191,11 @@
                 hideLoading();
             }
         });
-
+    
         sendMessageButton.addEventListener('click', async () => {
             const message = messageInput.value.trim();
-            if (message === '') return;
-
+            if (message === '' || !username) return;
+    
             showLoading();
             try {
                 const password = document.getElementById('password').value;
@@ -176,7 +205,7 @@
                         'Authorization': `Basic ${btoa(password)}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ message })
+                    body: JSON.stringify({ username, message })
                 });
                 if (response.ok) {
                     messageInput.value = '';
@@ -190,11 +219,11 @@
                 hideLoading();
             }
         });
-
+    
         refreshMessagesButton.addEventListener('click', () => {
             loadMessages(); // Load messages on refresh
         });
-
+    
         const loadMessages = async () => {
     const password = document.getElementById('password').value;
     try {
@@ -204,41 +233,43 @@
             }
         });
 
-        if (response.ok) {
-            const messages = await response.json();
-            messagesDiv.innerHTML = '';
-            messages.forEach(msg => {
-                const msgDiv = document.createElement('div');
-                msgDiv.className = 'message';
-                msgDiv.textContent = msg.content;
-                messagesDiv.appendChild(msgDiv);
-            });
-        } else {
-            const errorMessage = `Failed to load messages. Status: ${response.status}, Status Text: ${response.statusText}`;
-            showError(errorMessage);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+
+        const messages = await response.json();
+        messagesDiv.innerHTML = '';
+        messages.forEach(msg => {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message';
+            msgDiv.innerHTML = `<strong>${msg.username || '🌀'}</strong><p>${msg.content}</p>`;
+            messagesDiv.appendChild(msgDiv);
+        });
     } catch (error) {
-        const errorMessage = `An error occurred while loading messages: ${error.message}`;
-        showError(errorMessage);
+        // Handle error silently
+        console.error(`An error occurred while loading messages: ${error.message}`);
+        // Optionally, update the UI to reflect the error in a non-intrusive way
     }
 };
+    
         const showLoading = () => {
             document.getElementById('loading').style.display = 'block';
         };
-
+    
         const hideLoading = () => {
             document.getElementById('loading').style.display = 'none';
         };
-
+    
         const showError = (message) => {
             alert(message); // Simple alert for errors
         };
-
+    
         const startAutoRefresh = () => {
             setInterval(() => {
-                refreshMessagesButton.click();
-            }, 3000); // Refresh every 3 seconds
+                loadMessages();
+            }, 2000); // Refresh every 3 seconds
         };
     </script>
+    
 </body>
 </html>
