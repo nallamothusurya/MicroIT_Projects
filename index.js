@@ -159,7 +159,6 @@ app.post('/upload', extractPassword, upload.single('file'), async (req, res) => 
 });
 
 // Handle chat messages
-// Handle chat messages
 app.post('/chat', extractPassword, async (req, res) => {
     const { username, message } = req.body;
 
@@ -176,7 +175,7 @@ app.post('/chat', extractPassword, async (req, res) => {
             parents: [folderId],
         };
 
-        const messageContent = `${username || 'Anonymous'}: ${message}`;
+        const messageContent = `<strong>${username || 'Anonymous'}: </strong>${message}`;
         const bufferStream = new stream.PassThrough();
         bufferStream.end(messageContent);
 

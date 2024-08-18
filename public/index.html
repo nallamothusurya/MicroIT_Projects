@@ -5,126 +5,189 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Camelchat</title>
     <style>
-        /* Import Google Font */
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+         /* Import Google Font */
+         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
-        body {
-            font-family: 'Roboto', Arial, sans-serif;
-            background-color: #004080;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            color: #fff;
-        }
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    background-color: #e5ddd5;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    color: #333;
+}
 
-        #login, #chatInterface {
-            display: none;
-            width: 100%;
-            max-width: 400px;
-            padding: 20px;
-            background: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgb(255, 255, 255);
-            color: #000000;
-            font-size: 16px;
-        }
+#login, #chatInterface {
+    display: none;
+    width: 100%;
+    max-width: 600px;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    color: #000;
+    font-size: 16px;
+    box-sizing: border-box;
+}
 
-        #login {
-            display: block;
-        }
+#login {
+    display: block;
+}
 
-        h1, h2 {
-            margin: 0 0 15px;
-            text-align: center;
-            color: #004080;
-        }
+h1, h2 {
+    margin: 0 0 20px;
+    text-align: center;
+    color: #00796b;
+}
 
-        input[type="password"], input[type="text"], textarea {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            font-family: 'Roboto', Arial, sans-serif;
-            font-size: 16px;
-        }
+input[type="password"], input[type="text"], textarea {
+    width: 100%;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 25px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+    box-sizing: border-box;
+}
 
-        button {
-            width: calc(100% - 20px);
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            background-color: #1e88e5;
-            color: #fff;
-            cursor: pointer;
-            margin: 10px 0;
-            transition: background-color 0.3s ease;
-            font-family: 'Roboto', Arial, sans-serif;
-            font-size: 16px;
-        }
+button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 25px;
+    background-color: #00796b;
+    color: #fff;
+    cursor: pointer;
+    margin: 10px 0;
+    transition: background-color 0.3s ease;
+    font-size: 16px;
+}
 
-        button:hover {
-            background-color: #1565c0;
-        }
+button:hover {
+    background-color: #004d40;
+}
 
-        #messages {
-            max-height: 300px;
-            overflow-y: auto;
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 5px;
-            background-color: #f0f0f0;
-        }
+#messages {
+    max-height: 30vh;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-sizing: auto;
+}
 
-        .message {
-            background: #e0e0e0;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
+.message {
+    background: #dcf8c6;
+    padding: 10px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+    max-width: 80%;
+    position: relative;
+    box-sizing: border-box;
+}
 
-        .message strong {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-            color: #000000;
-            font-weight: bold;
-        }
+.message.sent {
+    background: #ffffff;
+    align-self: flex-end;
+}
 
-        #loading {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            color: #fff;
-            text-align: center;
-            padding-top: 20%;
-            font-size: 24px;
-            z-index: 1000;
-            font-family: 'Roboto', Arial, sans-serif;
-        }
+.message strong {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
 
-        .spinner {
-            border: 8px solid #f3f3f3;
-            border-top: 8px solid #1e88e5;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
+#loading {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    text-align: center;
+    padding-top: 20%;
+    font-size: 24px;
+    z-index: 1000;
+}
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+.spinner {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #00796b;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    #login, #chatInterface {
+        padding: 15px;
+        max-width: 90%;
+    }
+
+    button {
+        padding: 12px;
+    }
+
+    input[type="password"], input[type="text"], textarea {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .message {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    #login, #chatInterface {
+        padding: 10px;
+        max-width: 95%;
+    }
+
+    button {
+        padding: 10px;
+    }
+
+    input[type="password"], input[type="text"], textarea {
+        padding: 10px;
+        font-size: 12px;
+    }
+
+    .message {
+        font-size: 12px;
+    }
+}
+.message {
+    position: relative;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.timestamp {
+    position: absolute;
+    bottom: 5px;
+    right: 10px;
+    font-size: 0.8em;
+    color: #888;
+}
+
     </style>
 </head>
 <body>
@@ -146,9 +209,9 @@
     <div id="chatInterface">
         <h2>Camelchat</h2>
         <div id="messages"></div>
+        <div id="typingMessage" style="display: none; color: #004080; text-align: center; margin: 10px 0;">Typing...</div>
         <textarea id="messageInput" placeholder="Type your message here..."></textarea>
         <button id="sendMessage">Send</button>
-        <button id="refreshMessages">Refresh Messages</button>
         <p>Note: After 24 hours, chats are automatically deleted.</p>
         <a href="https://vs24-five.vercel.app/" target="_blank">
             <p>Camelpad: for storing and sending files</p>
@@ -160,7 +223,6 @@
         const chatInterface = document.getElementById('chatInterface');
         const messagesDiv = document.getElementById('messages');
         const sendMessageButton = document.getElementById('sendMessage');
-        const refreshMessagesButton = document.getElementById('refreshMessages');
         const messageInput = document.getElementById('messageInput');
         let username = '';
     
@@ -220,10 +282,6 @@
             }
         });
     
-        refreshMessagesButton.addEventListener('click', () => {
-            loadMessages(); // Load messages on refresh
-        });
-    
         const loadMessages = async () => {
     const password = document.getElementById('password').value;
     try {
@@ -232,7 +290,6 @@
                 'Authorization': `Basic ${btoa(password)}`
             }
         });
-
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -242,15 +299,26 @@
         messages.forEach(msg => {
             const msgDiv = document.createElement('div');
             msgDiv.className = 'message';
-            msgDiv.innerHTML = `<strong>${msg.username || '🌀'}</strong><p>${msg.content}</p>`;
+            
+            // Get the current date and time
+            const now = new Date();
+            const formattedDateTime = now.toLocaleString(); // Adjust format if needed
+
+            // Create the message content with timestamp
+            msgDiv.innerHTML = `
+                <strong>${msg.username || '🌀'}</strong>
+                <p>${msg.content}</p>
+                <div class="timestamp">${formattedDateTime}</div>
+            `;
             messagesDiv.appendChild(msgDiv);
-        });
+        }); 
     } catch (error) {
         // Handle error silently
         console.error(`An error occurred while loading messages: ${error.message}`);
         // Optionally, update the UI to reflect the error in a non-intrusive way
     }
 };
+
     
         const showLoading = () => {
             document.getElementById('loading').style.display = 'block';
@@ -269,6 +337,24 @@
                 loadMessages();
             }, 2000); // Refresh every 3 seconds
         };
+
+        const typingMessageDiv = document.getElementById('typingMessage');
+let typingTimeout;
+
+messageInput.addEventListener('focus', () => {
+    typingMessageDiv.style.display = 'block';
+});
+
+messageInput.addEventListener('blur', () => {
+    // Hide typing message if the input loses focus
+    typingMessageDiv.style.display = 'none';
+});
+
+messageInput.addEventListener('input', () => {
+    // Clear previous typing timeout
+    clearTimeout(typingTimeout);
+});
+
     </script>
     
 </body>
