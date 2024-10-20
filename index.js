@@ -123,6 +123,9 @@ const uploadFile = async (fileObject, folderId) => {
 app.get('/', (req, res) => {
     res.sendFile(`${__dirname}/public/index.html`);
 });
+app.get('/favicon', (req, res) => {
+    res.sendFile(`${__dirname}/public/favicon.ico`);
+});
 
 // Handle login and file list retrieval
 app.get('/files', extractPassword, async (req, res) => {
