@@ -55,24 +55,6 @@ A simple stopwatch and clock app that runs fully in the browser, with Flask serv
 
 ---
 
-## Repository Structure
-
-MicroIT_Projects/
-│
-├── password/              # Project 11: Password Generator
-│   ├── app.py             # Flask backend app
-│   ├── index.html         # Frontend HTML page
-│   └── requirements.txt   # Python dependencies for this project
-│
-├── stopwatch/             # Project 12: Stopwatch / Clock
-│   ├── app.py             # Flask backend app
-│   └── index.html         # Frontend HTML page
-│
-└── README.md              # Combined project documentation
-
-
----
-
 ## About
 
 Developed by **Nallamothu Ayyappa Venkata Surya**.  
