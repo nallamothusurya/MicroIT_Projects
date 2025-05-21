@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project 11: Password Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f8fa;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            background-color: white;
+            padding: 25px 35px;
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 550px;
+            margin-bottom: 25px;
+            box-sizing: border-box;
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        p {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #666;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="number"],
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        input[type="number"]:focus,
+        button:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+        .checkbox-group label {
+            display: inline-flex;
+            align-items: center;
+            margin-right: 25px;
+            font-weight: normal;
+        }
+        input[type="checkbox"] {
+            margin-right: 8px;
+            transform: scale(1.2);
+        }
+        #generate-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        #generate-btn:hover {
+            background-color: #218838;
+            transform: translateY(-1px);
+        }
+        .section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            margin-top: 25px;
+        }
+        #password-display {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #007bff;
+            text-align: center;
+            word-wrap: break-word;
+            padding: 15px;
+            border: 1px dashed #aed6f1;
+            border-radius: 5px;
+            background-color: #eaf6fe;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="password-generator-app" class="container">
+        <h1>Project 11: Password Generator</h1>
+        <p>e s t . 2 0 2 5</p>
+        <p>Generate strong, random passwords to enhance your security.</p>
+        <div class="form-group">
+            <label for="password-length">Password Length:</label>
+            <input type="number" id="password-length" min="4" max="64" value="12">
+        </div>
+        <div class="checkbox-group form-group">
+            <label><input type="checkbox" id="include-uppercase" checked> Uppercase Letters</label>
+            <label><input type="checkbox" id="include-lowercase" checked> Lowercase Letters</label>
+            <label><input type="checkbox" id="include-numbers" checked> Numbers</label>
+            <label><input type="checkbox" id="include-special" checked> Special Characters</label>
+        </div>
+        <button id="generate-btn">Generate Password</button>
+        <div class="section">
+            <p>Generated Password:</p>
+            <p id="password-display">Click 'Generate Password' to create one!</p>
+        </div>
+        <p>Developed by Nallamothu Ayyappa Venkata Surya</p>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const passwordLengthInput = document.getElementById('password-length');
+            const includeUppercase = document.getElementById('include-uppercase');
+            const includeLowercase = document.getElementById('include-lowercase');
+            const includeNumbers = document.getElementById('include-numbers');
+            const includeSpecial = document.getElementById('include-special');
+            const generateBtn = document.getElementById('generate-btn');
+            const passwordDisplay = document.getElementById('password-display');
+
+            generateBtn.addEventListener('click', async () => {
+                const length = parseInt(passwordLengthInput.value);
+                const criteria = {
+                    length: length,
+                    use_uppercase: includeUppercase.checked,
+                    use_lowercase: includeLowercase.checked,
+                    use_digits: includeNumbers.checked,
+                    use_special: includeSpecial.checked,
+                };
+
+                if (!criteria.use_uppercase && !criteria.use_lowercase && !criteria.use_digits && !criteria.use_special) {
+                    passwordDisplay.textContent = 'Error: Please select at least one character type!';
+                    passwordDisplay.style.color = 'red';
+                    return;
+                }
+                if (isNaN(length) || length < 4 || length > 64) {
+                    passwordDisplay.textContent = 'Error: Length must be a number between 4 and 64.';
+                    passwordDisplay.style.color = 'red';
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/generate-password', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(criteria),
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Failed to generate password (unknown error)');
+                    }
+
+                    const data = await response.json();
+                    passwordDisplay.textContent = data.password;
+                    passwordDisplay.style.color = '#007bff';
+                } catch (error) {
+                    passwordDisplay.textContent = `Error: ${error.message}. Ensure 'password_generator_app/app.py' is running.`;
+                    passwordDisplay.style.color = 'red';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

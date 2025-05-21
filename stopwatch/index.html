@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project 12: Stopwatch / Clock</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #f5f8fa;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      background-color: white;
+      padding: 25px 35px;
+      border-radius: 10px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 550px;
+      margin-bottom: 25px;
+      box-sizing: border-box;
+    }
+    h1, h2 {
+      text-align: center;
+      color: #007bff;
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+    p {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #666;
+    }
+    .navbar {
+      margin-bottom: 30px;
+      background-color: #343a40;
+      padding: 10px 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .navbar button {
+      padding: 12px 20px;
+      margin: 0 8px;
+      cursor: pointer;
+      border: none;
+      border-radius: 6px;
+      background-color: #007bff;
+      color: white;
+      font-size: 1.05em;
+      font-weight: 600;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .navbar button:hover {
+      background-color: #0056b3;
+      transform: translateY(-2px);
+    }
+    .navbar button.active {
+      background-color: #28a745;
+      box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.5);
+    }
+    .hidden {
+      display: none;
+    }
+    .section {
+      background-color: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      margin-top: 25px;
+    }
+    .time-display {
+      font-family: 'Lucida Console', 'Courier New', monospace;
+      font-size: 3.5em;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #343a40;
+      letter-spacing: -1px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+    .controls {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .controls button {
+      width: auto;
+      padding: 12px 25px;
+      margin: 5px 8px;
+      font-size: 1.05em;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .controls button:hover {
+      background-color: #0056b3;
+      transform: translateY(-1px);
+    }
+    #start-btn { background-color: #28a745; }
+    #start-btn:hover { background-color: #218838; }
+    #pause-btn { background-color: #ffc107; color: #333; }
+    #pause-btn:hover { background-color: #e0a800; }
+    #reset-btn { background-color: #dc3545; }
+    #reset-btn:hover { background-color: #c82333; }
+    #lap-btn { background-color: #17a2b8; }
+    #lap-btn:hover { background-color: #138496; }
+    .lap-list {
+      max-height: 180px;
+      overflow-y: auto;
+      border: 1px solid #e9ecef;
+      padding: 10px;
+      background-color: #fcfcfc;
+      border-radius: 5px;
+    }
+    .lap-list p {
+      margin: 8px 0;
+      padding: 5px 0;
+      border-bottom: 1px dotted #e0e0e0;
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 0.95em;
+      text-align: left;
+    }
+    .lap-list p:last-child {
+      border-bottom: none;
+    }
+    @media (max-width: 600px) {
+      .navbar button {
+        font-size: 0.9em;
+        padding: 10px 12px;
+        margin: 0 4px;
+      }
+      .container {
+        padding: 20px;
+      }
+      .time-display {
+        font-size: 2.5em;
+      }
+      .controls button {
+        font-size: 0.9em;
+        padding: 10px 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <button id="show-stopwatch" class="active">Stopwatch</button>
+    <button id="show-clock">Clock</button>
+  </div>
+  <div id="stopwatch-app" class="container">
+    <h1>Project 12: Stopwatch</h1>
+    <p>e s t . 2 0 2 5</p>
+    <div class="time-display" id="stopwatch-display">00:00:00.000</div>
+    <div class="controls">
+      <button id="start-btn">Start</button>
+      <button id="pause-btn">Pause</button>
+      <button id="reset-btn">Reset</button>
+      <button id="lap-btn">Lap</button>
+    </div>
+    <div class="section">
+      <p>Laps:</p>
+      <div id="lap-list" class="lap-list"></div>
+    </div>
+  </div>
+  <div id="clock-app" class="container hidden">
+    <h1>Project 12: Current Clock</h1>
+    <p>e s t . 2 0 2 5</p>
+    <div class="time-display" id="clock-display">00:00:00</div>
+  </div>
+   <p>Developed by Nallamothu Ayyappa Venkata Surya</p>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const stopwatchApp = document.getElementById('stopwatch-app');
+      const clockApp = document.getElementById('clock-app');
+      const showStopwatchBtn = document.getElementById('show-stopwatch');
+      const showClockBtn = document.getElementById('show-clock');
+      const navButtons = [showStopwatchBtn, showClockBtn];
+
+      function showApp(appElement, activeBtn) {
+        stopwatchApp.classList.add('hidden');
+        clockApp.classList.add('hidden');
+        appElement.classList.remove('hidden');
+        navButtons.forEach(btn => btn.classList.remove('active'));
+        activeBtn.classList.add('active');
+      }
+
+      showStopwatchBtn.addEventListener('click', () => showApp(stopwatchApp, showStopwatchBtn));
+      showClockBtn.addEventListener('click', () => showApp(clockApp, showClockBtn));
+      showApp(stopwatchApp, showStopwatchBtn);
+
+      const stopwatchDisplay = document.getElementById('stopwatch-display');
+      const startBtn = document.getElementById('start-btn');
+      const pauseBtn = document.getElementById('pause-btn');
+      const resetBtn = document.getElementById('reset-btn');
+      const lapBtn = document.getElementById('lap-btn');
+      const lapList = document.getElementById('lap-list');
+
+      let stopwatchInterval;
+      let startTime;
+      let elapsedTime = 0;
+      let isRunning = false;
+      let lapCounter = 0;
+
+      function formatStopwatchTime(milliseconds) {
+        const totalSeconds = Math.floor(milliseconds / 1000);
+        const ms = milliseconds % 1000;
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(Math.floor(ms)).padStart(3, '0')}`;
+      }
+
+      function updateStopwatchDisplay() {
+        if (isRunning) {
+          elapsedTime = performance.now() - startTime;
+        }
+        stopwatchDisplay.textContent = formatStopwatchTime(elapsedTime);
+      }
+
+      startBtn.addEventListener('click', () => {
+        if (!isRunning) {
+          isRunning = true;
+          startTime = performance.now() - elapsedTime;
+          stopwatchInterval = setInterval(updateStopwatchDisplay, 10);
+        }
+      });
+
+      pauseBtn.addEventListener('click', () => {
+        if (isRunning) {
+          isRunning = false;
+          clearInterval(stopwatchInterval);
+        }
+      });
+
+      resetBtn.addEventListener('click', () => {
+        isRunning = false;
+        clearInterval(stopwatchInterval);
+        elapsedTime = 0;
+        lapCounter = 0;
+        lapList.innerHTML = '';
+        updateStopwatchDisplay();
+      });
+
+      lapBtn.addEventListener('click', () => {
+        if (isRunning) {
+          lapCounter++;
+          const lapTime = formatStopwatchTime(elapsedTime);
+          const lapEntry = document.createElement('p');
+          lapEntry.textContent = `Lap ${lapCounter}: ${lapTime}`;
+          lapList.prepend(lapEntry);
+        }
+      });
+
+      const clockDisplay = document.getElementById('clock-display');
+
+      function updateClockDisplay() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        clockDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+      }
+
+      setInterval(updateClockDisplay, 1000);
+      updateClockDisplay();
+    });
+  </script>
+</body>
+</html>
