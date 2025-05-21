@@ -53,7 +53,7 @@ def index():
     except FileNotFoundError:
         return "Error: password_generator.html not found.", 404
 
-@app.route('/generate-password', methods=['POST'])
+@app.route('/', methods=['POST'])
 def handle_generate_password():
     data = request.get_json()
     if not data:
