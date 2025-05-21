@@ -1,0 +1,586 @@
+password/app.py :
+from flask import Flask, request, jsonify, render_template_string
+import random
+import string
+import os
+
+app = Flask(__name__, template_folder=os.path.join(os.path.dirname(__file__)))
+
+def generate_password_core(length, use_uppercase, use_lowercase, use_digits, use_special):
+    characters = []
+    required_chars = []
+
+    lower_chars = string.ascii_lowercase
+    upper_chars = string.ascii_uppercase
+    digit_chars = string.digits
+    special_chars = '!@#$%^&*()-_=+[{}]:;<>,.?/'
+
+    if use_lowercase:
+        characters.extend(list(lower_chars))
+        required_chars.append(random.choice(lower_chars))
+    if use_uppercase:
+        characters.extend(list(upper_chars))
+        required_chars.append(random.choice(upper_chars))
+    if use_digits:
+        characters.extend(list(digit_chars))
+        required_chars.append(random.choice(digit_chars))
+    if use_special:
+        characters.extend(list(special_chars))
+        required_chars.append(random.choice(special_chars))
+
+    if not characters:
+        return None, "No character types selected. Please select at least one type."
+    if not (4 <= length <= 64):
+        return None, "Password length must be between 4 and 64 characters."
+    if length < len(required_chars):
+        return None, f"Password length ({length}) is too short for the selected character types ({len(required_chars)}). Please increase length."
+
+    password_list = required_chars
+    remaining_length = length - len(required_chars)
+
+    for _ in range(remaining_length):
+        password_list.append(random.choice(characters))
+
+    random.shuffle(password_list)
+
+    return "".join(password_list), None
+
+@app.route('/')
+def index():
+    try:
+        with open('index.html', 'r', encoding='utf-8') as f:
+            html_content = f.read()
+        return render_template_string(html_content)
+    except FileNotFoundError:
+        return "Error: password_generator.html not found.", 404
+
+@app.route('/', methods=['POST'])
+def handle_generate_password():
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'Invalid request: No JSON data provided.'}), 400
+
+    length = data.get('length')
+    use_uppercase = data.get('use_uppercase')
+    use_lowercase = data.get('use_lowercase')
+    use_digits = data.get('use_digits')
+    use_special = data.get('use_special')
+
+    if not all(isinstance(arg, bool) for arg in [use_uppercase, use_lowercase, use_digits, use_special]) or \
+       not isinstance(length, int):
+        return jsonify({'error': 'Invalid input types. Please provide boolean flags and an integer length.'}), 400
+
+    password, error_message = generate_password_core(length, use_uppercase, use_lowercase, use_digits, use_special)
+
+    if error_message:
+        return jsonify({'error': error_message}), 400
+    else:
+        return jsonify({'password': password}), 200
+
+if __name__ == '__main__':
+    print("--- Running Project 11: Password Generator Backend ---")
+    print("  Access the app at: http://127.0.0.1:5000")
+    print("  Use Ctrl+C to stop the server.")
+    app.run(debug=True, port=5000)
+
+
+password/index.html :
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project 11: Password Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f8fa;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            background-color: white;
+            padding: 25px 35px;
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 550px;
+            margin-bottom: 25px;
+            box-sizing: border-box;
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        p {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #666;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="number"],
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        input[type="number"]:focus,
+        button:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+        .checkbox-group label {
+            display: inline-flex;
+            align-items: center;
+            margin-right: 25px;
+            font-weight: normal;
+        }
+        input[type="checkbox"] {
+            margin-right: 8px;
+            transform: scale(1.2);
+        }
+        #generate-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        #generate-btn:hover {
+            background-color: #218838;
+            transform: translateY(-1px);
+        }
+        .section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            margin-top: 25px;
+        }
+        #password-display {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #007bff;
+            text-align: center;
+            word-wrap: break-word;
+            padding: 15px;
+            border: 1px dashed #aed6f1;
+            border-radius: 5px;
+            background-color: #eaf6fe;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="password-generator-app" class="container">
+        <h1>Project 11: Password Generator</h1>
+        <p>e s t . 2 0 2 5</p>
+        <p>Generate strong, random passwords to enhance your security.</p>
+        <div class="form-group">
+            <label for="password-length">Password Length:</label>
+            <input type="number" id="password-length" min="4" max="64" value="12">
+        </div>
+        <div class="checkbox-group form-group">
+            <label><input type="checkbox" id="include-uppercase" checked> Uppercase Letters</label>
+            <label><input type="checkbox" id="include-lowercase" checked> Lowercase Letters</label>
+            <label><input type="checkbox" id="include-numbers" checked> Numbers</label>
+            <label><input type="checkbox" id="include-special" checked> Special Characters</label>
+        </div>
+        <button id="generate-btn">Generate Password</button>
+        <div class="section">
+            <p>Generated Password:</p>
+            <p id="password-display">Click 'Generate Password' to create one!</p>
+        </div>
+        <p>Developed by Nallamothu Ayyappa Venkata Surya</p>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const passwordLengthInput = document.getElementById('password-length');
+            const includeUppercase = document.getElementById('include-uppercase');
+            const includeLowercase = document.getElementById('include-lowercase');
+            const includeNumbers = document.getElementById('include-numbers');
+            const includeSpecial = document.getElementById('include-special');
+            const generateBtn = document.getElementById('generate-btn');
+            const passwordDisplay = document.getElementById('password-display');
+
+            generateBtn.addEventListener('click', async () => {
+                const length = parseInt(passwordLengthInput.value);
+                const criteria = {
+                    length: length,
+                    use_uppercase: includeUppercase.checked,
+                    use_lowercase: includeLowercase.checked,
+                    use_digits: includeNumbers.checked,
+                    use_special: includeSpecial.checked,
+                };
+
+                if (!criteria.use_uppercase && !criteria.use_lowercase && !criteria.use_digits && !criteria.use_special) {
+                    passwordDisplay.textContent = 'Error: Please select at least one character type!';
+                    passwordDisplay.style.color = 'red';
+                    return;
+                }
+                if (isNaN(length) || length < 4 || length > 64) {
+                    passwordDisplay.textContent = 'Error: Length must be a number between 4 and 64.';
+                    passwordDisplay.style.color = 'red';
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/generate-password', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(criteria),
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Failed to generate password (unknown error)');
+                    }
+
+                    const data = await response.json();
+                    passwordDisplay.textContent = data.password;
+                    passwordDisplay.style.color = '#007bff';
+                } catch (error) {
+                    passwordDisplay.textContent = `Error: ${error.message}. Ensure 'password_generator_app/app.py' is running.`;
+                    passwordDisplay.style.color = 'red';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
+
+password/requirements.txt :
+flask
+
+stopwatch/app.py :
+from flask import Flask, render_template_string
+import os
+
+app = Flask(__name__, template_folder=os.path.join(os.path.dirname(__file__)))
+
+@app.route('/')
+def index():
+    try:
+        with open('index.html', 'r', encoding='utf-8') as f:
+            html_content = f.read()
+        return render_template_string(html_content)
+    except FileNotFoundError:
+        return "Error: index.html not found.", 404
+
+if __name__ == '__main__':
+    print("--- Running Project 12: Stopwatch / Clock Backend ---")
+    print("  Access the app at: http://127.0.0.1:5000")
+    print("  Note: All stopwatch/clock logic runs directly in your browser.")
+    print("  This backend merely serves the HTML file.")
+    print("  Use Ctrl+C to stop the server.")
+    app.run(debug=True, port=5000)
+
+
+stopwatch/index.html :
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project 12: Stopwatch / Clock</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #f5f8fa;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      background-color: white;
+      padding: 25px 35px;
+      border-radius: 10px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 550px;
+      margin-bottom: 25px;
+      box-sizing: border-box;
+    }
+    h1, h2 {
+      text-align: center;
+      color: #007bff;
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+    p {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #666;
+    }
+    .navbar {
+      margin-bottom: 30px;
+      background-color: #343a40;
+      padding: 10px 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .navbar button {
+      padding: 12px 20px;
+      margin: 0 8px;
+      cursor: pointer;
+      border: none;
+      border-radius: 6px;
+      background-color: #007bff;
+      color: white;
+      font-size: 1.05em;
+      font-weight: 600;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .navbar button:hover {
+      background-color: #0056b3;
+      transform: translateY(-2px);
+    }
+    .navbar button.active {
+      background-color: #28a745;
+      box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.5);
+    }
+    .hidden {
+      display: none;
+    }
+    .section {
+      background-color: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      margin-top: 25px;
+    }
+    .time-display {
+      font-family: 'Lucida Console', 'Courier New', monospace;
+      font-size: 3.5em;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #343a40;
+      letter-spacing: -1px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+    .controls {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .controls button {
+      width: auto;
+      padding: 12px 25px;
+      margin: 5px 8px;
+      font-size: 1.05em;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .controls button:hover {
+      background-color: #0056b3;
+      transform: translateY(-1px);
+    }
+    #start-btn { background-color: #28a745; }
+    #start-btn:hover { background-color: #218838; }
+    #pause-btn { background-color: #ffc107; color: #333; }
+    #pause-btn:hover { background-color: #e0a800; }
+    #reset-btn { background-color: #dc3545; }
+    #reset-btn:hover { background-color: #c82333; }
+    #lap-btn { background-color: #17a2b8; }
+    #lap-btn:hover { background-color: #138496; }
+    .lap-list {
+      max-height: 180px;
+      overflow-y: auto;
+      border: 1px solid #e9ecef;
+      padding: 10px;
+      background-color: #fcfcfc;
+      border-radius: 5px;
+    }
+    .lap-list p {
+      margin: 8px 0;
+      padding: 5px 0;
+      border-bottom: 1px dotted #e0e0e0;
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 0.95em;
+      text-align: left;
+    }
+    .lap-list p:last-child {
+      border-bottom: none;
+    }
+    @media (max-width: 600px) {
+      .navbar button {
+        font-size: 0.9em;
+        padding: 10px 12px;
+        margin: 0 4px;
+      }
+      .container {
+        padding: 20px;
+      }
+      .time-display {
+        font-size: 2.5em;
+      }
+      .controls button {
+        font-size: 0.9em;
+        padding: 10px 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <button id="show-stopwatch" class="active">Stopwatch</button>
+    <button id="show-clock">Clock</button>
+  </div>
+  <div id="stopwatch-app" class="container">
+    <h1>Project 12: Stopwatch</h1>
+    <p>e s t . 2 0 2 5</p>
+    <div class="time-display" id="stopwatch-display">00:00:00.000</div>
+    <div class="controls">
+      <button id="start-btn">Start</button>
+      <button id="pause-btn">Pause</button>
+      <button id="reset-btn">Reset</button>
+      <button id="lap-btn">Lap</button>
+    </div>
+    <div class="section">
+      <p>Laps:</p>
+      <div id="lap-list" class="lap-list"></div>
+    </div>
+  </div>
+  <div id="clock-app" class="container hidden">
+    <h1>Project 12: Current Clock</h1>
+    <p>e s t . 2 0 2 5</p>
+    <div class="time-display" id="clock-display">00:00:00</div>
+  </div>
+   <p>Developed by Nallamothu Ayyappa Venkata Surya</p>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const stopwatchApp = document.getElementById('stopwatch-app');
+      const clockApp = document.getElementById('clock-app');
+      const showStopwatchBtn = document.getElementById('show-stopwatch');
+      const showClockBtn = document.getElementById('show-clock');
+      const navButtons = [showStopwatchBtn, showClockBtn];
+
+      function showApp(appElement, activeBtn) {
+        stopwatchApp.classList.add('hidden');
+        clockApp.classList.add('hidden');
+        appElement.classList.remove('hidden');
+        navButtons.forEach(btn => btn.classList.remove('active'));
+        activeBtn.classList.add('active');
+      }
+
+      showStopwatchBtn.addEventListener('click', () => showApp(stopwatchApp, showStopwatchBtn));
+      showClockBtn.addEventListener('click', () => showApp(clockApp, showClockBtn));
+      showApp(stopwatchApp, showStopwatchBtn);
+
+      const stopwatchDisplay = document.getElementById('stopwatch-display');
+      const startBtn = document.getElementById('start-btn');
+      const pauseBtn = document.getElementById('pause-btn');
+      const resetBtn = document.getElementById('reset-btn');
+      const lapBtn = document.getElementById('lap-btn');
+      const lapList = document.getElementById('lap-list');
+
+      let stopwatchInterval;
+      let startTime;
+      let elapsedTime = 0;
+      let isRunning = false;
+      let lapCounter = 0;
+
+      function formatStopwatchTime(milliseconds) {
+        const totalSeconds = Math.floor(milliseconds / 1000);
+        const ms = milliseconds % 1000;
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(Math.floor(ms)).padStart(3, '0')}`;
+      }
+
+      function updateStopwatchDisplay() {
+        if (isRunning) {
+          elapsedTime = performance.now() - startTime;
+        }
+        stopwatchDisplay.textContent = formatStopwatchTime(elapsedTime);
+      }
+
+      startBtn.addEventListener('click', () => {
+        if (!isRunning) {
+          isRunning = true;
+          startTime = performance.now() - elapsedTime;
+          stopwatchInterval = setInterval(updateStopwatchDisplay, 10);
+        }
+      });
+
+      pauseBtn.addEventListener('click', () => {
+        if (isRunning) {
+          isRunning = false;
+          clearInterval(stopwatchInterval);
+        }
+      });
+
+      resetBtn.addEventListener('click', () => {
+        isRunning = false;
+        clearInterval(stopwatchInterval);
+        elapsedTime = 0;
+        lapCounter = 0;
+        lapList.innerHTML = '';
+        updateStopwatchDisplay();
+      });
+
+      lapBtn.addEventListener('click', () => {
+        if (isRunning) {
+          lapCounter++;
+          const lapTime = formatStopwatchTime(elapsedTime);
+          const lapEntry = document.createElement('p');
+          lapEntry.textContent = `Lap ${lapCounter}: ${lapTime}`;
+          lapList.prepend(lapEntry);
+        }
+      });
+
+      const clockDisplay = document.getElementById('clock-display');
+
+      function updateClockDisplay() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        clockDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+      }
+
+      setInterval(updateClockDisplay, 1000);
+      updateClockDisplay();
+    });
+  </script>
+</body>
+</html>
+
+
+stopwatch/requirements.txt :
+flask
+

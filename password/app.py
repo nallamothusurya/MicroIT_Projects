@@ -51,9 +51,9 @@ def index():
             html_content = f.read()
         return render_template_string(html_content)
     except FileNotFoundError:
-        return "Error: password_generator.html not found.", 404
+        return "Error: index.html not found.", 404
 
-@app.route('/', methods=['POST'])
+@app.route('/generate-password', methods=['POST'])  # <-- Updated this route
 def handle_generate_password():
     data = request.get_json()
     if not data:
